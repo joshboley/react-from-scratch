@@ -8,4 +8,8 @@ See the steps in each feature branch (links below):
 
 * [Go here](https://github.com/joshboley/react-from-scratch/tree/step-1)
 
+## Step 2: Add Todos to List
+
+* [Go here](https://github.com/joshboley/react-from-scratch/tree/step-2)
+
 ## More steps in progress
