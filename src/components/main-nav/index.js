@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Navbar, FormGroup, FormControl } from 'react-bootstrap';
 
-export default class MainNav extends React.Component {
+export default class MainNav extends Component {
     render() {
         return (
             <Navbar collapseOnSelect>

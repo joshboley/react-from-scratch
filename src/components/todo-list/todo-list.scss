@@ -1,0 +1,16 @@
+.todo-list {
+    .todo-item {
+        .checkbox {
+            float: left;
+        }
+
+        h4 {
+            float: left;
+            margin-left: 20px;
+        }
+
+        button {
+            float: right;
+        }
+    }
+}
