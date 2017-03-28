@@ -1,0 +1,18 @@
+.category-list-component {
+    .category-list {
+        width: 100%;
+        float: left;
+        margin-top: 10px;
+
+        .category-item {
+            padding-right: 0;
+            border: none;
+
+            span {
+                margin: 0 10px;
+                font-size: 16px;
+                font-weight: bold;
+            }
+        }
+    }
+}

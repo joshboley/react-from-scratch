@@ -1,8 +1,13 @@
 import React, { Component } from 'react';
 
+import guid from '../util/guid';
+
 import MainNav from './main-nav';
 import AddTodo from './add-todo';
 import TodoList from './todo-list';
+import AddCategory from './add-category';
+import CategoryList from './category-list';
+import CategoryModal from './category-modal';
 
 export default class App extends Component {
     constructor (props) {
@@ -10,9 +15,21 @@ export default class App extends Component {
         this.onAddTodo = this.onAddTodo.bind(this);
         this.onTodoChecked = this.onTodoChecked.bind(this);
         this.onTodoEdit = this.onTodoEdit.bind(this);
+        this.onAddCategory = this.onAddCategory.bind(this);
+        this.onCategoryExpanded = this.onCategoryExpanded.bind(this);
+        this.onCategoryDelete = this.onCategoryDelete.bind(this);
+        this.deleteCategory = this.deleteCategory.bind(this);
+        this.showCategoryModal = this.showCategoryModal.bind(this);
+        this.onCategorySave = this.onCategorySave.bind(this);
+        this.addOrEditCategory = this.addOrEditCategory.bind(this);
+        this.onModalClose = this.onModalClose.bind(this);
 
         this.state = {
-            todos: []
+            todos: [],
+            categories: [],
+            showModal: false,
+            modalCategory: null,
+            modalParentCategory: null
         };
     }
 
@@ -20,8 +37,20 @@ export default class App extends Component {
         return (
             <div>
                 <MainNav />
-                <AddTodo onAddTodo={this.onAddTodo} />
-                <TodoList todos={this.state.todos} onTodoChecked={this.onTodoChecked} onTodoEdit={this.onTodoEdit} />
+                <div className="row">
+                    <div className="col-xs-12 col-sm-4">
+                        <AddCategory onAddCategory={this.onAddCategory} />
+                        <CategoryList categories={this.state.categories} onCategoryExpanded={this.onCategoryExpanded} 
+                                      onCategoryEditButtonClicked={(cat) => this.showCategoryModal(cat, true)} onCategoryDelete={this.onCategoryDelete}
+                                      onCategoryAddButtonClicked={(cat) => this.showCategoryModal(cat, false)} />
+                    </div>
+                    <div className="col-xs-12 col-sm-8">
+                        <AddTodo onAddTodo={this.onAddTodo} />
+                        <TodoList todos={this.state.todos} onTodoChecked={this.onTodoChecked} onTodoEdit={this.onTodoEdit} />
+                    </div>
+                </div>
+                {this.state.showModal &&
+                 <CategoryModal show={true} categoryTitle={this.state.modalCategory ? this.state.modalCategory.title : null} onSave={this.onCategorySave} onClose={this.onModalClose} />}
             </div>
         );
     }
@@ -29,11 +58,11 @@ export default class App extends Component {
     onAddTodo (value) {
         this.setState({
             todos: [{
-                id: this.state.todos.length + 1,
+                id: guid(),
                 title: value,
                 isDone: false,
                 description: null
-            }, ...this.state.todos] 
+            }, ...this.state.todos],
         });
     }
 
@@ -41,16 +70,123 @@ export default class App extends Component {
         this.setState({
             todos: this.state.todos.map((todo) => {
                 return todo.id !== id ? todo : {
-                    id: todo.id,
-                    title: todo.title,
+                    ...todo,
                     isDone: isDone,
-                    description: todo.description
                 };
-            })
+            }),
         });
     }
 
     onTodoEdit (todo) {
         console.log('Edit Todo:', todo);
+    }
+
+    onAddCategory (value, parentId) {
+        this.setState({
+            categories: [{
+                id: guid(),
+                title: value,
+                parent: parentId || null,
+                children: [],
+                isDone: false,
+                isExpanded: false,
+            }, ...this.state.categories],
+        });
+    }
+
+    onCategoryExpanded (id, isExpanded) {
+        this.setState({
+            categories: this.setCategoryExpanded(id, this.state.categories, isExpanded)
+        });
+    }
+
+    setCategoryExpanded (id, categories, isExpanded) {
+        return categories.map(category => {
+            if (category.id === id) {
+                return {
+                    ...category,
+                    isExpanded: isExpanded
+                };
+            } else if (category.children && category.children.length) {
+                return {
+                    ...category,
+                    children: this.setCategoryExpanded(id, category.children, isExpanded)
+                };
+            } else {
+                return category;
+            }
+        });
+    } 
+
+    onCategoryDelete (id) {
+        this.setState({
+            categories: this.deleteCategory(id, this.state.categories)
+        });
+    }
+
+    deleteCategory (id, categories) {
+        return categories.filter(category => {
+            if (category.id === id) {
+                return false;
+            } else if (category.children && category.children.length) {
+                category.children = this.deleteCategory(id, category.children);
+            }
+
+            return true;
+        });
+    }
+
+    onCategorySave (value) {
+        let isEdit = this.state.modalCategory ? true : false;
+        let id = isEdit ? this.state.modalCategory.id : this.state.modalParentCategory.id;
+        this.setState({
+            categories: this.addOrEditCategory(id, this.state.categories, value, isEdit)
+        });
+    }
+
+    addOrEditCategory (id, categories, newCategoryTitle, isEdit) {
+        return categories.map(category => {
+            if (!isEdit && category.id === id) {
+                return {
+                    ...category,
+                    children: [{
+                        id: guid(),
+                        title: newCategoryTitle,
+                        parent: category.id,
+                        children: [],
+                        isDone: false,
+                        isExpanded: false,
+                    }, ...category.children]
+                };
+            } else if (isEdit && category.id === id) {
+                return {
+                    ...category,
+                    title: newCategoryTitle
+                };
+            } else if (category.children && category.children.length) {
+                return {
+                    ...category,
+                    children: this.addOrEditCategory(id, category.children, newCategoryTitle, isEdit)
+                };
+            } else {
+                return category;
+            }
+        });
+    }
+
+    showCategoryModal (category, isEdit) {
+        this.setState({
+            showModal: true,
+            modalCategory: isEdit ? category : null,
+            modalParentCategory: isEdit ? null : category,
+        });
+    }
+
+    onModalClose () {
+        this.setState({
+            showModal: false,
+            modalCategory: null,
+            modalParentCategory: null,
+        })
     }
 }
