@@ -12,4 +12,8 @@ See the steps in each feature branch (links below):
 
 * [Go here](https://github.com/joshboley/react-from-scratch/tree/step-2)
 
+## Step 3: Add Categories to List
+
+* [Go here](https://github.com/joshboley/react-from-scratch/tree/step-3)
+
 ## More steps in progress
