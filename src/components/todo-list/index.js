@@ -11,7 +11,7 @@ export default class TodoList extends Component {
     render () {
         return (
             <ListGroup className="todo-list">
-                {this.props.todos.map((todo) => (
+                {this.props.todos && this.props.todos.map((todo) => (
                     <ListGroupItem key={todo.id} className="todo-item clearfix">
                         <Checkbox className="checkbox" checked={todo.isDone} onChange={(e) => this.props.onTodoChecked(todo.id, !todo.isDone)} />
                         <h4>{todo.title}</h4>

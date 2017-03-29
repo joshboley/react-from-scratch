@@ -23,13 +23,16 @@ export default class App extends Component {
         this.onCategorySave = this.onCategorySave.bind(this);
         this.addOrEditCategory = this.addOrEditCategory.bind(this);
         this.onModalClose = this.onModalClose.bind(this);
+        this.onCategorySelected = this.onCategorySelected.bind(this);
 
         this.state = {
-            todos: [],
+            todos: {},
             categories: [],
             showModal: false,
             modalCategory: null,
-            modalParentCategory: null
+            modalParentCategory: null,
+            selectedCategory: null,
+            selectedTodos: null
         };
     }
 
@@ -40,13 +43,13 @@ export default class App extends Component {
                 <div className="row">
                     <div className="col-xs-12 col-sm-4">
                         <AddCategory onAddCategory={this.onAddCategory} />
-                        <CategoryList categories={this.state.categories} onCategoryExpanded={this.onCategoryExpanded} 
+                        <CategoryList categories={this.state.categories} selectedCategoryId={this.state.selectedCategory ? this.state.selectedCategory.id : null} onCategoryExpanded={this.onCategoryExpanded} 
                                       onCategoryEditButtonClicked={(cat) => this.showCategoryModal(cat, true)} onCategoryDelete={this.onCategoryDelete}
-                                      onCategoryAddButtonClicked={(cat) => this.showCategoryModal(cat, false)} />
+                                      onCategoryAddButtonClicked={(cat) => this.showCategoryModal(cat, false)} onCategorySelected={this.onCategorySelected} />
                     </div>
                     <div className="col-xs-12 col-sm-8">
-                        <AddTodo onAddTodo={this.onAddTodo} />
-                        <TodoList todos={this.state.todos} onTodoChecked={this.onTodoChecked} onTodoEdit={this.onTodoEdit} />
+                        <AddTodo isDisabled={!this.state.selectedCategory} onAddTodo={this.onAddTodo} />
+                        <TodoList todos={this.state.selectedTodos} onTodoChecked={this.onTodoChecked} onTodoEdit={this.onTodoEdit} />
                     </div>
                 </div>
                 {this.state.showModal &&
@@ -56,13 +59,21 @@ export default class App extends Component {
     }
 
     onAddTodo (value) {
+        if (!this.state.selectedCategory) return;
+
+        let selectedTodos = [{
+            id: guid(),
+            title: value,
+            isDone: false,
+            description: null
+        }, ...(this.state.selectedTodos || [])];
+
         this.setState({
-            todos: [{
-                id: guid(),
-                title: value,
-                isDone: false,
-                description: null
-            }, ...this.state.todos],
+            todos: {
+                ...this.state.todos,
+                [this.state.selectedCategory.id]: selectedTodos
+            },
+            selectedTodos: selectedTodos
         });
     }
 
@@ -119,8 +130,18 @@ export default class App extends Component {
     } 
 
     onCategoryDelete (id) {
+        let wasSelectedCategoryDeleted = this.state.selectedCategory && this.state.selectedCategory.id === id;
+
         this.setState({
-            categories: this.deleteCategory(id, this.state.categories)
+            categories: this.deleteCategory(id, this.state.categories),
+            todos: Object.keys(this.state.todos)
+                .filter(key => key !== id)
+                .reduce((obj, key) => {
+                    obj[key] = this.state.todos[key];
+                    return obj;
+                }, {}),
+            selectedCategory: wasSelectedCategoryDeleted ? null : this.state.selectedCategory,
+            selectedTodos: wasSelectedCategoryDeleted ? null : this.state.selectedTodos
         });
     }
 
@@ -188,5 +209,12 @@ export default class App extends Component {
             modalCategory: null,
             modalParentCategory: null,
         })
+    }
+
+    onCategorySelected (category) {
+        this.setState({
+            selectedCategory: category,
+            selectedTodos: this.state.todos[category.id]
+        });
     }
 }

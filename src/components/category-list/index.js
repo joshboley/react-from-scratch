@@ -21,7 +21,8 @@ export default class CategoryList extends Component {
             <ListGroup className="category-list">
                 {categories.map((category) => {
                     return (
-                        <ListGroupItem key={category.id} className="category-item clearfix">
+                        <ListGroupItem key={category.id} className={"category-item clearfix " + (this.props.selectedCategoryId === category.id ? "active" : "")}>
+                            <div className="clickable-area" onClick={e => this.props.onCategorySelected(category)}></div>
                             <div className="pull-left">
                                 <Button className={"glyphicon glyphicon-chevron-" + (category.isExpanded ? "down" : "right")} 
                                         onClick={(e) => this.props.onCategoryExpanded(category.id, !category.isExpanded)} />

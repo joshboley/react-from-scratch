@@ -16,7 +16,7 @@ export default class AddTodo extends Component {
                     <InputGroup>
                         <FormControl name="todo_name" type="text" placeholder="Add Todo" />
                         <InputGroup.Button>
-                            <Button type="submit">Add</Button>
+                            <Button type="submit" disabled={this.props.isDisabled}>Add</Button>
                         </InputGroup.Button>    
                     </InputGroup>
                 </FormGroup>
@@ -25,8 +25,12 @@ export default class AddTodo extends Component {
     }
 
     addTodo (e) {
+        let val = e.target.todo_name.value;
         e.preventDefault();
-        this.props.onAddTodo(e.target.todo_name.value);
+
+        if (!val || val.trim() === '') return;
+
+        this.props.onAddTodo(val);
         e.target.reset();
     }
 }
