@@ -27,11 +27,12 @@ export default class CategoryList extends Component {
                                 <Button className={"glyphicon glyphicon-chevron-" + (category.isExpanded ? "down" : "right")} 
                                         onClick={(e) => this.props.onCategoryExpanded(category.id, !category.isExpanded)} />
                                 <span>{category.title}</span>
-                                <Button className="glyphicon glyphicon-edit" onClick={(e) => this.props.onCategoryEditButtonClicked(category)} />
+                                {!this.props.isEditMode && <Button className="glyphicon glyphicon-edit" onClick={(e) => this.props.onCategoryEditButtonClicked(category)} />}
                             </div>
                             <div className="pull-right">
-                                <Button className="glyphicon glyphicon-trash" onClick={(e) => this.props.onCategoryDelete(category.id)} />
-                                <Button className="glyphicon glyphicon-plus" onClick={(e) => this.props.onCategoryAddButtonClicked(category)} />
+                                {this.props.isEditMode && <Button className="glyphicon glyphicon-share" onClick={(e) => this.props.onCategoryAssigned(category.id)} />}
+                                {!this.props.isEditMode && <Button className="glyphicon glyphicon-trash" onClick={(e) => this.props.onCategoryDelete(category.id)} />}
+                                {!this.props.isEditMode && <Button className="glyphicon glyphicon-plus" onClick={(e) => this.props.onCategoryAddButtonClicked(category)} />}
                             </div>
                             {category.isExpanded && category.children && category.children.length > 0 && this.renderCategories(category.children)}
                         </ListGroupItem>
