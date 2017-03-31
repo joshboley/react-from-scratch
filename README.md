@@ -20,4 +20,8 @@ See the steps in each feature branch (links below):
 
 * [Go here](https://github.com/joshboley/react-from-scratch/tree/step-4)
 
+## Step 5: Add Todos to Categories
+
+* [Go here](https://github.com/joshboley/react-from-scratch/tree/step-5)
+
 ## More steps in progress
